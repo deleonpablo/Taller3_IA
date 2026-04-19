@@ -324,3 +324,5 @@ class TestComplexEntailment:
         # No podemos concluir quién específicamente es culpable
         assert check_entailment(kb, Atom("a_culpable")) is False
         assert check_entailment(kb, Atom("b_culpable")) is False
+        
+

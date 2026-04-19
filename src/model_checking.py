@@ -8,10 +8,11 @@ Hint: Usa las funciones get_atoms() y evaluate() de logic_core.py.
 
 from __future__ import annotations
 
-from src.logic_core import Formula
+from src.logic_core import Formula, And, Not
 
 
 def get_all_models(atoms: set[str]) -> list[dict[str, bool]]:
+    
     """
     Genera todos los modelos posibles (asignaciones de verdad).
     Para n atomos, genera 2^n modelos.
@@ -31,9 +32,68 @@ def get_all_models(atoms: set[str]) -> list[dict[str, bool]]:
           Cada bit corresponde al valor de verdad de un atomo.
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa get_all_models()")
+    count = 0
+    numeros =[]
+    for i in atoms:
+        count += 1
+    numero = 2**count
+
+    for i in range(numero):
+        numeros.append(i)
+
+    bits = len(atoms)
+
+    
+    liston = []
+    for i in numeros:
+        liston.append(convertiABinario(i,count))
+        
+    atomos_lista = list(atoms)
+    resultado_final = []
+
+    for binario in liston:
+        diccionario_modelo = {}
+        for i in range(len(atomos_lista)):
+            nombre_atomo = atomos_lista[i]
+            valor_bit = binario[i]
+            if (valor_bit == 0) :
+                diccionario_modelo[nombre_atomo] = True
+            else : 
+                diccionario_modelo[nombre_atomo] = False    
+            
+            
+            
+        resultado_final.append(diccionario_modelo)
+
+    return resultado_final
+
+
+
+
+
+
+
     # === END YOUR CODE ===
 
+def convertiABinario(numero, bits):
+        lista= []
+
+        while numero>=2 :
+            lista.append(numero%2)
+            numero = numero // 2 
+                
+            
+
+        lista.append(numero%2)
+        if(len(lista))< bits:
+            for i in range(bits- len(lista)):
+                lista.append(0)
+            
+            
+            
+        lista.reverse()
+
+        return lista
 
 def check_satisfiable(formula: Formula) -> tuple[bool, dict[str, bool] | None]:
     """
@@ -54,7 +114,15 @@ def check_satisfiable(formula: Formula) -> tuple[bool, dict[str, bool] | None]:
           la formula en cada uno usando evaluate().
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa check_satisfiable()")
+    setProposiciones = formula.get_atoms()
+    valores = get_all_models(setProposiciones)
+    
+    for modelo in valores:
+        if formula.evaluate(modelo):
+            return (True, modelo)
+    
+    return (False, None)
+    
     # === END YOUR CODE ===
 
 
@@ -76,7 +144,14 @@ def check_valid(formula: Formula) -> bool:
           Alternativamente, verifica que sea verdadera en TODOS los modelos.
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa check_valid()")
+    setProposiciones = formula.get_atoms()
+    valores = get_all_models(setProposiciones)
+    
+    for modelo in valores:
+        if not formula.evaluate(modelo):
+            return False  
+            
+    return True
     # === END YOUR CODE ===
 
 
@@ -101,7 +176,20 @@ def check_entailment(kb: list[Formula], query: Formula) -> bool:
           y la query sea falsa.
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa check_entailment()")
+    if len(kb) == 0:
+        antecedente = None
+    elif len(kb) == 1:
+        antecedente = kb[0]         
+    else:
+        antecedente = And(*kb)
+
+    if antecedente is not None:
+        formula_a_revisar = And(antecedente, Not(query))
+    else:
+        formula_a_revisar = Not(query)
+
+    satisfacible, _ = check_satisfiable(formula_a_revisar)
+    return not satisfacible
     # === END YOUR CODE ===
 
 
@@ -125,5 +213,8 @@ def truth_table(formula: Formula) -> list[tuple[dict[str, bool], bool]]:
     Hint: Combina get_all_models() y evaluate().
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa truth_table()")
+    setProposiciones = formula.get_atoms()
+    modelos = get_all_models(setProposiciones)
+    
+    return [(m, formula.evaluate(m)) for m in modelos]
     # === END YOUR CODE ===
