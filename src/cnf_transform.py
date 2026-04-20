@@ -70,7 +70,13 @@ def eliminate_iff(formula: Formula) -> Formula:
         return And(*(eliminate_iff(c) for c in formula.conjuncts))
     
     if isinstance(formula, Or):
-        return Or(*(eliminate_iff(d) for d in formula.conjuncts))
+        return Or(*(eliminate_iff(d) for d in formula.disjuncts))
+    
+    if isinstance(formula, Implies):
+        return Implies(
+            eliminate_iff(formula.antecedent),
+            eliminate_iff(formula.consequent),
+        )
     
     if isinstance(formula, Iff):
         A = eliminate_iff(formula.left)
@@ -110,11 +116,11 @@ def eliminate_implication(formula: Formula) -> Formula:
         return And(*(eliminate_implication(c) for c in formula.conjuncts))
     
     if isinstance(formula, Or):
-        return Or(*(eliminate_implication(d) for d in formula.conjuncts))
+        return Or(*(eliminate_implication(d) for d in formula.disjuncts))
     
     if isinstance(formula, Implies):
-        A = eliminate_implication(formula.left)
-        B = eliminate_implication(formula.right)
+        A = eliminate_implication(formula.antecedent)
+        B = eliminate_implication(formula.consequent)
         
         return Or(Not(A), B)
     raise NotImplementedError("Implementa eliminate_implication()")
@@ -157,10 +163,10 @@ def push_negation_inward(formula: Formula) -> Formula:
             return push_negation_inward(inner.operand)
         
         if isinstance(inner, And):
-            return Or(*(push_negation_inward(Not(c) for c in inner.conjuncts)))
+            return Or(*(push_negation_inward(Not(c)) for c in inner.conjuncts))
         
         if isinstance(inner, Or):
-            return And(*(push_negation_inward(d) for d in inner.conjuncts))
+            return And(*(push_negation_inward(Not(d)) for d in inner.disjuncts))
         
         return Not(push_negation_inward(inner))
     
@@ -168,7 +174,7 @@ def push_negation_inward(formula: Formula) -> Formula:
         return And(*(push_negation_inward(c) for c in formula.conjuncts))
     
     if isinstance(formula, Or):
-        return And(*(push_negation_inward(d) for d in formula.conjuncts))
+        return Or(*(push_negation_inward(d) for d in formula.disjuncts))
     
     raise NotImplementedError("Implementa push_negation_inward()")
     # === END YOUR CODE ===
@@ -208,7 +214,7 @@ def distribute_or_over_and(formula: Formula) -> Formula:
     
     if isinstance(formula, Or):
         
-        disjuncts = [distribute_or_over_and(d) for d in formula.conjuncts]
+        disjuncts = [distribute_or_over_and(d) for d in formula.disjuncts]
         
         for d in disjuncts:
             if isinstance(d, And):
