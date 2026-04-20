@@ -28,16 +28,88 @@ def crear_kb() -> KnowledgeBase:
     kb = KnowledgeBase()
 
     # Constantes del caso
-    elena          = Term("elena")
-    victor         = Term("victor")
-    don_rodrigo    = Term("don_rodrigo")
-    marquesa       = Term("marquesa")
-    estuche_joyas  = Term("estuche_joyas")
+    elena = Term("elena")
+    victor = Term("victor")
+    don_rodrigo = Term("don_rodrigo")
+    marquesa = Term("marquesa")
+    estuche_joyas = Term("estuche_joyas")
     vagon_equipaje = Term("vagon_equipaje")
 
-    # === YOUR CODE HERE ===
+    # Variables
+    x = Term("$X")
+    y = Term("$Y")
+    l = Term("$L")
 
-    # === END YOUR CODE ===
+    # Hechos
+    kb.add_fact(Predicate("en_escena", (elena,)))
+    kb.add_fact(Predicate("huellas_en", (elena, estuche_joyas)))
+
+    kb.add_fact(Predicate("grabado_en", (don_rodrigo, vagon_equipaje)))
+    kb.add_fact(Predicate("lugar_alejado", (vagon_equipaje,)))
+
+    kb.add_fact(Predicate("victima", (marquesa,)))
+    kb.add_fact(Predicate("acusa", (marquesa, elena)))
+
+    kb.add_fact(Predicate("da_coartada", (victor, elena)))
+    kb.add_fact(Predicate("da_coartada", (elena, victor)))
+
+    # Reglas
+    kb.add_rule(
+        Rule(
+            head=Predicate("descartado", (x,)),
+            body=(
+                Predicate("grabado_en", (x, l)),
+                Predicate("lugar_alejado", (l,)),
+            ),
+        )
+    )
+
+    kb.add_rule(
+        Rule(
+            head=Predicate("testigo_imparcial", (x,)),
+            body=(Predicate("victima", (x,)),),
+        )
+    )
+
+    kb.add_rule(
+        Rule(
+            head=Predicate("acusacion_creible", (x, y)),
+            body=(
+                Predicate("testigo_imparcial", (x,)),
+                Predicate("acusa", (x, y)),
+            ),
+        )
+    )
+
+    kb.add_rule(
+        Rule(
+            head=Predicate("culpable", (x,)),
+            body=(
+                Predicate("en_escena", (x,)),
+                Predicate("acusacion_creible", (y, x)),
+            ),
+        )
+    )
+
+    kb.add_rule(
+        Rule(
+            head=Predicate("defiende_al_culpable", (x,)),
+            body=(
+                Predicate("da_coartada", (x, y)),
+                Predicate("culpable", (y,)),
+            ),
+        )
+    )
+
+    kb.add_rule(
+        Rule(
+            head=Predicate("alianza_coartadas", (x, y)),
+            body=(
+                Predicate("da_coartada", (x, y)),
+                Predicate("da_coartada", (y, x)),
+            ),
+        )
+    )
 
     return kb
 
