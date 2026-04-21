@@ -232,6 +232,7 @@ def get_atoms(formula: Formula) -> frozenset[str]:
     Ejemplo:
         >>> get_atoms(Implies(Atom('p'), And(Atom('q'), Atom('r'))))
         frozenset({'p', 'q', 'r'})
+        def isInclass(aqui poner el nombre que va para devoms r el frozenSet) 
     """
     return formula.get_atoms()
 
